@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "T7hrMhhv8z4dXGEx2VxRjVc8rABk6s1X2fjiFs1NGVI=",
+  "Source": "DotnetCouchbaseExample",
+  "BasePath": "_content/DotnetCouchbaseExample",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
