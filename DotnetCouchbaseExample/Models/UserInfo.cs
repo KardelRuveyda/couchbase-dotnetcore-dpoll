@@ -11,7 +11,7 @@
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
         public bool IsActive { get; set; }
-        public Presentation[] Presentations { get; set; }
+        public Presentation[]? Presentations { get; set; } 
     }
 
     public class Presentation
@@ -22,18 +22,18 @@
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
         public bool IsActive { get; set; } = false;
-        public Slide[] Slides { get; set; }
+        public Slide[]? Slides { get; set; }
     }
 
     public class Slide
     {
         public string Id { get; set; }
-        public string TemplateId { get; set; }
+        public int TemplateId { get; set; } = 1;
         public int Order { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public bool IsActive { get; set; }
-        public Question[] Questions { get; set; }
+        public Question[]? Questions { get; set; }
     }
 
     public class Question
@@ -44,7 +44,7 @@
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
         public bool IsActive { get; set; }
-        public Option[] Options { get; set; }
+        public Option[]? Options { get; set; }
     }
 
     public class Option

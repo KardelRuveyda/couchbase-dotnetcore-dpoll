@@ -1,46 +1,76 @@
 using DotnetCouchbaseExample.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 
 [Route("api/[controller]")]
 [ApiController]
 public class UserInfoController : ControllerBase
 {
-    private readonly UserInfoService _couchbaseService;
+    private readonly ICouchbaseService _couchbaseService;
 
-    public UserInfoController(UserInfoService couchbaseService)
+    public UserInfoController(ICouchbaseService couchbaseService)
     {
         _couchbaseService = couchbaseService;
     }
 
-    [HttpPost]
-    public async Task<IActionResult> Create([FromBody] UserInfo userInfo)
+    [HttpPost("add")]
+    public async Task<IActionResult> CreateUser([FromBody] UserInfo userInfo)
     {
-        var uniqueId = Guid.NewGuid().ToString();
-        userInfo.Id = uniqueId;
-        await _couchbaseService.InsertAsync(uniqueId, userInfo);
-        return Ok(new { Id = uniqueId });
-    }
+        if (userInfo == null)
+        {
+            return BadRequest("User information is null.");
+        }
 
-    [HttpPut("{id}")]
-    public async Task<IActionResult> Update(string id, [FromBody] UserInfo userInfo)
-    {
-        userInfo.Id = id;
-        await _couchbaseService.UpsertAsync(id, userInfo);
-        return Ok();
+        userInfo.Id = System.Guid.NewGuid().ToString();
+        await _couchbaseService.InsertAsync(userInfo.Id.ToString(), userInfo);
+        return Ok("User added successfully.");
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> Get(string id)
+    public async Task<IActionResult> GetUserById(string id)
     {
         var result = await _couchbaseService.GetAsync(id);
+
+        if (result.ContentAs<UserInfo>() == null)
+        {
+            return NotFound();
+        }
+
         return Ok(result.ContentAs<UserInfo>());
     }
 
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(string id)
+    [HttpPut("update/{id}")]
+    public async Task<IActionResult> UpdateUser(string id, [FromBody] UserInfo updatedUserInfo)
     {
+        if (updatedUserInfo == null || id != updatedUserInfo.Id)
+        {
+            return BadRequest("User information is null or ID mismatch.");
+        }
+
+        var result = await _couchbaseService.GetAsync(id);
+        var existingUserInfo = result.ContentAs<UserInfo>();
+
+        if (existingUserInfo == null)
+        {
+            return NotFound("User not found.");
+        }
+
+        updatedUserInfo.Id = existingUserInfo.Id;
+        updatedUserInfo.Presentations = existingUserInfo.Presentations;
+
+        await _couchbaseService.UpsertAsync(id, updatedUserInfo);
+        return Ok("User updated successfully.");
+    }
+
+    [HttpDelete("delete/{id}")]
+    public async Task<IActionResult> DeleteUser(string id)
+    {
+        var result = await _couchbaseService.GetAsync(id);
+        if (result == null)
+        {
+            return NotFound("User not found.");
+        }
+
         await _couchbaseService.RemoveAsync(id);
-        return Ok();
+        return Ok("User deleted successfully.");
     }
 }

@@ -1,17 +1,14 @@
-﻿using Couchbase;
-using Couchbase.Extensions.DependencyInjection;
+﻿using Couchbase.Extensions.DependencyInjection;
 using Couchbase.KeyValue;
-using Microsoft.Extensions.Configuration;
-using System.Threading.Tasks;
+using Couchbase;
 
-public class UserInfoService
+public class CouchbaseService : ICouchbaseService
 {
     private readonly IBucket _bucket;
     private readonly ICouchbaseCollection _collection;
 
-    public UserInfoService(IBucketProvider bucketProvider)
+    public CouchbaseService(IBucketProvider bucketProvider)
     {
-        // Bucket'ı al
         _bucket = bucketProvider.GetBucketAsync("travel-sample").GetAwaiter().GetResult();
         var scope = _bucket.Scope("futuverse");
         _collection = scope.Collection("UserInfos");

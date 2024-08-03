@@ -1,11 +1,16 @@
 using Couchbase;
 using Couchbase.Extensions.DependencyInjection;
+using DotnetCouchbaseExample.Filters;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Couchbase ile baðlantý için gerekli ayarlarý ekleyin
-builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+
+builder.Configuration
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+    .AddUserSecrets<Program>(optional: true, reloadOnChange: true);
+
 var couchbaseConfig = builder.Configuration.GetSection("Couchbase");
 var connectionString = couchbaseConfig["ConnectionString"];
 var username = couchbaseConfig["Username"];
@@ -23,22 +28,22 @@ builder.Services.AddCouchbase(options =>
     options.ConnectionString = connectionString;
     options.UserName = username;
     options.Password = password;
-    // Burada ilk bucket'ý seçiyoruz veya birden fazla bucket'ý destekleyecek þekilde yapýlandýrabilirsiniz
     options.Buckets = buckets;
 });
 
 
-//builder.Services.AddSingleton()
-builder.Services.AddSingleton<UserInfoService>();
+builder.Services.AddSingleton<ICouchbaseService, CouchbaseService>();
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+    c.SchemaFilter<CustomSchemaFilter>(); 
+});
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
